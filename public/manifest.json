@@ -1,20 +1,21 @@
 {
   "short_name": "Aeon",
-  "name": "Aeon Website",
+  "name": "Aeon",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/Aeon/icons/icon-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/Aeon/icons/icon-512x512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
-  "start_url": "/",
-  "background_color": "#000000",
+  "start_url": "/Aeon",
+  "background_color": "#ffffff",
   "display": "standalone",
-  "theme_color": "#000000"
+  "theme_color": "#000000",
+  "scope": "/Aeon/"
 }

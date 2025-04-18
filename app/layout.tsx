@@ -1,11 +1,18 @@
 import type React from "react"
 import "@/app/globals.css"
 import type { Metadata } from "next"
+import registerServiceWorker from './pwa-register';
 
 export const metadata: Metadata = {
   title: "Aeon Website",
   description: "Aeon Website Description",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  manifest: '/manifest.json',
+  themeColor: '#000000',
+}
+
+if (typeof window !== 'undefined') {
+  registerServiceWorker();
 }
 
 export default function RootLayout({
