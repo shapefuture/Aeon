@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "pnpm build && npx gh-pages -d out",
-    "predeploy": "npm run build",
+    "deploy": "pnpm run build && npx gh-pages -d out",
+    "predeploy": "pnpm run build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -46,6 +46,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
+    "critters": "^0.0.25",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "expo": "latest",

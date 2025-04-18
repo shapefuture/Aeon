@@ -17,6 +17,10 @@ const nextConfig = {
     config.resolve.alias['@'] = path.join(__dirname, '');
     return config;
   },
+  trailingSlash: true,
+  experimental: {
+    optimizeCss: true,
+  },
 };
 
 module.exports = withPWA(nextConfig);

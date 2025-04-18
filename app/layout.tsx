@@ -26,8 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="/Aeon/manifest.json" />
         <meta name="theme-color" content="#000000" />
+        <link rel="icon" href="/Aeon/favicon.ico" />
       </head>
       <body className="min-h-screen bg-black font-sans antialiased">
         {children}
