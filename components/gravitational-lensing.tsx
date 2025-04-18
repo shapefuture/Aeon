@@ -98,8 +98,11 @@ export function GravitationalLensing({ blackHolePosition, blackHoleRadius, lensS
   }, [blackHoleRadius])
 
   return (
-    <mesh ref={meshRef} position={blackHolePosition} geometry={geometry}>
-      <gravitationalLensingMaterial ref={materialRef} transparent={true} depthWrite={false} side={THREE.BackSide} />
-    </mesh>
+    <mesh
+      ref={meshRef}
+      position={blackHolePosition}
+      geometry={geometry}
+      material={materialRef.current}
+    />
   )
 }

@@ -175,7 +175,7 @@ export function AeonLanding() {
 
       {/* Audio element for whispers */}
       <audio ref={audioRef} className="hidden">
-        <source src="/placeholder.svg" type="audio/mpeg" />
+        {/* Audio source removed */}
       </audio>
 
       {/* Navigation */}
@@ -348,7 +348,7 @@ export function AeonLanding() {
             >
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                style={{ backgroundImage: "url('/placeholder.svg?height=400&width=800')" }}
+                style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIj48L3N2Zz4=')" }}
               ></div>
               <div className="absolute inset-0 bg-[#0C0C0C]/60"></div>
               <div className="absolute bottom-0 left-0 p-6">
@@ -545,7 +545,7 @@ export function AeonLanding() {
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-110"
-                    style={{ backgroundImage: `url('/placeholder.svg?height=400&width=400')` }}
+                    style={{ backgroundImage: `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48L3N2Zz4=')` }}
                   ></div>
                   <div className="absolute inset-0 bg-[#0C0C0C]/60 group-hover:bg-[#0C0C0C]/40 transition-all duration-700"></div>
                   <div className="absolute bottom-0 left-0 p-4 w-full">

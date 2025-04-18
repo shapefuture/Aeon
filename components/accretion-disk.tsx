@@ -3,8 +3,24 @@
 import { useRef, useMemo } from "react"
 import { useFrame } from "@react-three/fiber"
 import { shaderMaterial } from "@react-three/drei"
+// @ts-ignore
 import * as THREE from "three"
 import { extend } from "@react-three/fiber"
+
+// Type declaration for custom shader material
+declare module "@react-three/fiber" {
+  interface ThreeElements {
+    accretionDiskMaterial: React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLElement>,
+      HTMLElement
+    > & {
+      ref?: React.Ref<any>
+      transparent?: boolean
+      depthWrite?: boolean
+      side?: number
+    }
+  }
+}
 
 // Accretion disk shader material
 const AccretionDiskMaterial = shaderMaterial(
@@ -85,7 +101,13 @@ extend({ AccretionDiskMaterial })
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      accretionDiskMaterial: any
+      accretionDiskMaterial: {
+        ref?: React.RefObject<any>
+        transparent?: boolean
+        depthWrite?: boolean
+        side?: number
+        [key: string]: any
+      }
     }
   }
 }

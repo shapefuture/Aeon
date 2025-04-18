@@ -104,8 +104,11 @@ export function BlackHole({ position, radius, rotationSpeed, glowIntensity }: Bl
   const geometry = useMemo(() => new THREE.SphereGeometry(radius, 64, 64), [radius])
 
   return (
-    <mesh ref={meshRef} position={position} geometry={geometry}>
-      <blackHoleMaterial ref={materialRef} glowColor={new THREE.Color(0.1, 0.1, 0.4)} />
-    </mesh>
+    <mesh
+      ref={meshRef}
+      position={position}
+      geometry={geometry}
+      material={materialRef.current}
+    />
   )
 }

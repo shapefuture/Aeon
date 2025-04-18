@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo } from "react"
+import { useRef, useEffect, useMemo, useCallback } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { Stars, useTexture, AdaptiveDpr, PerformanceMonitor } from "@react-three/drei"
 import * as THREE from "three"
@@ -59,8 +59,12 @@ interface BlackHoleProps {
 
 // Wrapper component that handles performance optimization
 function BlackHoleWithPerformanceOptimization({ scrollY }: BlackHoleProps) {
-  const { gl } = useThree()
-  const [quality, setQuality] = useState("high")
+  const { gl, scene, camera } = useThree()
+  const [quality, setQuality] = useState<"high" | "medium" | "low">("high")
+
+  const animate = useCallback(() => {
+    gl.render(scene, camera)
+  }, [gl, scene, camera])
 
   // Monitor performance and adjust quality
   useEffect(() => {
@@ -73,16 +77,13 @@ function BlackHoleWithPerformanceOptimization({ scrollY }: BlackHoleProps) {
       }
     }
 
-    const animate = () => {
-      gl.render(gl.scene, gl.camera)
-    }
-
     document.addEventListener("visibilitychange", handleVisibilityChange)
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange)
+      gl.setAnimationLoop(null)
     }
-  }, [gl])
+  }, [gl, animate])
 
   // Adjust quality based on device capabilities
   useEffect(() => {
@@ -136,7 +137,7 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
   }, [quality])
 
   // Create textures for the accretion disk - memoized to prevent recreation
-  const diskTexture = useTexture("/placeholder.svg?height=512&width=512")
+  const diskTexture = useTexture("/icons/icon-512x512.png") // Using existing app icon as fallback texture
 
   // Create materials with optimized shaders based on quality
   const materials = useMemo(() => {

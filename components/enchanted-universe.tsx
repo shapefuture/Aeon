@@ -162,12 +162,10 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
     // Star particles shader
     const starsMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        time: { value: 0 },
-        size: { value: 1.0 },
+        time: { value: 0 }
       },
       vertexShader: `
         uniform float time;
-        uniform float size;
         attribute float size;
         attribute vec3 color;
         varying vec3 vColor;
@@ -459,40 +457,37 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
+              args={[starParticles.positions, 3]}
               count={starParticles.positions.length / 3}
-              array={starParticles.positions}
-              itemSize={3}
             />
             <bufferAttribute
               attach="attributes-size"
+              args={[starParticles.sizes, 1]}
               count={starParticles.sizes.length}
-              array={starParticles.sizes}
-              itemSize={1}
             />
             <bufferAttribute
               attach="attributes-color"
+              args={[starParticles.colors, 3]}
               count={starParticles.colors.length / 3}
-              array={starParticles.colors}
-              itemSize={3}
             />
           </bufferGeometry>
           <primitive object={materials.starsMaterial} attach="material" />
         </points>
 
         {/* Constellation lines */}
-        <line ref={constellationRef} geometry={constellationGeometry} renderOrder={2}>
+        <lineSegments ref={constellationRef} geometry={constellationGeometry} renderOrder={2}>
           <primitive object={materials.constellationMaterial} attach="material" />
-        </line>
+        </lineSegments>
 
         {/* Mystical glyphs */}
         <group ref={glyphsRef} renderOrder={3}>
-          <line geometry={glyphGeometries.pentagram} position={[1.5, 0.8, 0]}>
+          <lineSegments geometry={glyphGeometries.pentagram} position={[1.5, 0.8, 0]}>
             <primitive object={materials.glyphMaterial} attach="material" />
-          </line>
+          </lineSegments>
 
-          <line geometry={glyphGeometries.spiral} position={[-1.5, -0.8, 0]}>
+          <lineSegments geometry={glyphGeometries.spiral} position={[-1.5, -0.8, 0]}>
             <primitive object={materials.glyphMaterial} attach="material" />
-          </line>
+          </lineSegments>
 
           <mesh geometry={glyphGeometries.circle} position={[0, 1.5, 0]}>
             <primitive object={materials.glyphMaterial} attach="material" />

@@ -1,6 +1,6 @@
 import type React from "react"
 import "@/app/globals.css"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import registerServiceWorker from './pwa-register';
 
 export const metadata: Metadata = {
@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "Aeon Website Description",
   generator: 'v0.dev',
   manifest: '/manifest.json',
+}
+
+export const viewport: Viewport = {
   themeColor: '#000000',
 }
 

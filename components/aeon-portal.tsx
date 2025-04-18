@@ -3,6 +3,7 @@
 import { useRef, useEffect, useMemo } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { AdaptiveDpr } from "@react-three/drei"
+// @ts-ignore
 import * as THREE from "three"
 
 interface AeonPortalProps {
@@ -270,25 +271,34 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
 
   // Create a subtle particle system for the background
   const ParticleField = useMemo(() => {
+    const positions = new Float32Array(200 * 3)
+    const sizes = new Float32Array(200)
+    
+    for (let i = 0; i < 200; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 10
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 10
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+      sizes[i] = Math.random() * 0.03 + 0.02 // Random sizes between 0.02-0.05
+    }
+
     return (
       <points>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={200}
-            array={(() => {
-              const arr = new Float32Array(200 * 3)
-              for (let i = 0; i < 200; i++) {
-                arr[i * 3] = (Math.random() - 0.5) * 10
-                arr[i * 3 + 1] = (Math.random() - 0.5) * 10
-                arr[i * 3 + 2] = (Math.random() - 0.5) * 10
-              }
-              return arr
-            })()}
-            itemSize={3}
+            args={[positions, 3]}
+          />
+          <bufferAttribute
+            attach="attributes-size"
+            args={[sizes, 1]}
           />
         </bufferGeometry>
-        <pointsMaterial size={0.05} color="#9C9C9C" transparent opacity={0.6} />
+        <pointsMaterial
+          sizeAttenuation={true}
+          color="#9C9C9C"
+          transparent
+          opacity={0.6}
+        />
       </points>
     )
   }, [])
