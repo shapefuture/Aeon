@@ -11,8 +11,8 @@ const nextConfig = {
     unoptimized: true,
   },
   output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/Aeon' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/Aeon/' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '/aeon' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/aeon/' : '',
   webpack: (config) => {
     config.resolve.alias['@'] = path.join(__dirname, '');
     return config;

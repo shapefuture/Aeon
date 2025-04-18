@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/generate-manifest.js && next build",
     "deploy": "pnpm run build && npx gh-pages -d out",
     "predeploy": "pnpm run build",
     "start": "next start",
