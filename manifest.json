@@ -1,0 +1,21 @@
+{
+  "short_name": "Aeon",
+  "name": "Aeon",
+  "icons": [
+    {
+      "src": "/Aeon/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/Aeon/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/Aeon",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "scope": "/Aeon/"
+}
