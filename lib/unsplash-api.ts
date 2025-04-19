@@ -6,7 +6,7 @@ const unsplashLogger = logger.child('UnsplashAPI')
 
 // Define the Unsplash API access key
 // In a real application, this should be stored in an environment variable
-const UNSPLASH_ACCESS_KEY = 'your_unsplash_access_key'
+const UNSPLASH_ACCESS_KEY = 'Yl0_i4llreUJkEwppf9C87QACcFhBOBPFN2Glk3yWcs'
 
 // Define the Unsplash API URL
 const UNSPLASH_API_URL = 'https://api.unsplash.com'

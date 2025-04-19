@@ -1,11 +1,11 @@
 const fs = require('fs')
 const path = require('path')
 
-const basePath = process.env.NODE_ENV === 'production' ? '/aeon' : ''
+const basePath = process.env.NODE_ENV === 'production' || process.env.GITHUB_ACTIONS ? '/Aeon' : ''
 
 const manifest = {
-  short_name: 'aeon',
-  name: 'aeon',
+  short_name: 'Aeon',
+  name: 'Aeon Website',
   icons: [
     {
       src: `${basePath}/icons/icon-192x192.png`,
@@ -19,7 +19,7 @@ const manifest = {
     },
   ],
   start_url: `${basePath}/`,
-  background_color: '#ffffff',
+  background_color: '#000000',
   display: 'standalone',
   theme_color: '#000000',
   scope: `${basePath}/`,

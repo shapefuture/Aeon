@@ -3,6 +3,9 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  // Fix for GitHub Pages
+  publicExcludes: ['!icons/**/*'],
+  buildExcludes: []
 })
 const path = require('path')
 
@@ -17,8 +20,8 @@ const nextConfig = {
     domains: ['images.unsplash.com', 'via.placeholder.com'],
   },
   output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/Aeon' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/Aeon/' : '',
+  basePath: process.env.GITHUB_ACTIONS ? '/Aeon' : '',
+  assetPrefix: process.env.GITHUB_ACTIONS ? '/Aeon/' : '',
   webpack: config => {
     config.resolve.alias['@'] = path.join(__dirname, '')
     return config
