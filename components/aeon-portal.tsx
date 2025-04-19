@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useRef, useEffect, useMemo } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { AdaptiveDpr } from "@react-three/drei"
+import { useRef, useEffect, useMemo } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { AdaptiveDpr } from '@react-three/drei'
 // @ts-ignore
-import * as THREE from "three"
+import * as THREE from 'three'
 
 interface AeonPortalProps {
   scrollY: number
@@ -25,7 +25,7 @@ export function AeonPortal({ scrollY }: AeonPortalProps) {
       gl={{
         antialias: true,
         alpha: true,
-        powerPreference: "high-performance",
+        powerPreference: 'high-performance',
         depth: false,
         stencil: false,
       }}
@@ -41,7 +41,7 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
   const portalRef = useRef<THREE.Group>(null)
   const innerRingRef = useRef<THREE.Mesh>(null)
   const outerRingRef = useRef<THREE.Mesh>(null)
-  const { size, viewport } = useThree()
+  const { viewport } = useThree() // size is unused but may be needed in future updates
 
   // Animation state for smooth transitions
   const animationState = useRef({
@@ -76,7 +76,7 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
       },
       vertexShader: `
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -86,36 +86,36 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
         uniform float time;
         uniform float intensity;
         varying vec2 vUv;
-        
+
         // Function to create iridescent effect
         vec3 iridescence(float angle) {
           // Create a subtle iridescent effect
           vec3 baseColor = vec3(0.96, 0.95, 0.94); // Porcelain white
           vec3 accentColor1 = vec3(0.61, 0.61, 0.61); // Ether gray
           vec3 accentColor2 = vec3(0.05, 0.05, 0.05); // Deep obsidian
-          
+
           float t1 = 0.5 + 0.5 * sin(angle * 5.0 + time * 0.5);
           float t2 = 0.5 + 0.5 * sin(angle * 3.0 - time * 0.3);
-          
+
           vec3 color = mix(baseColor, accentColor1, t1 * 0.7);
           color = mix(color, accentColor2, t2 * 0.3);
-          
+
           return color * intensity;
         }
-        
+
         void main() {
           // Calculate angle for iridescent effect
           float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
-          
+
           // Create pulsating effect
           float pulse = 1.0 + 0.1 * sin(time * 0.4);
-          
+
           // Get iridescent color
           vec3 color = iridescence(angle) * pulse;
-          
+
           // Add subtle glow
           float glow = 0.8 + 0.2 * sin(time * 0.3);
-          
+
           gl_FragColor = vec4(color, glow);
         }
       `,
@@ -131,7 +131,7 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
       },
       vertexShader: `
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -140,15 +140,15 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
       fragmentShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         void main() {
           // Ether gray with subtle variation
           vec3 color = vec3(0.61, 0.61, 0.61);
-          
+
           // Add subtle pulsing
           float pulse = 0.9 + 0.1 * sin(time * 0.2);
           color *= pulse;
-          
+
           gl_FragColor = vec4(color, 0.7);
         }
       `,
@@ -164,7 +164,7 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
       },
       vertexShader: `
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -173,20 +173,20 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
       fragmentShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         void main() {
           // Deep obsidian base
           vec3 color = vec3(0.05, 0.05, 0.05);
-          
+
           // Add subtle edge glow
           float edgeGlow = smoothstep(0.4, 0.5, abs(vUv.x - 0.5) + abs(vUv.y - 0.5));
           vec3 glowColor = vec3(0.3, 0.3, 0.3);
-          
+
           // Subtle time variation
           float variation = 0.95 + 0.05 * sin(time * 0.15);
-          
+
           color = mix(color, glowColor, edgeGlow * variation);
-          
+
           gl_FragColor = vec4(color, 0.9);
         }
       `,
@@ -199,7 +199,7 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
   }, [])
 
   // Animation loop with frame timing and smooth interpolation
-  useFrame((state) => {
+  useFrame(state => {
     const time = state.clock.getElapsedTime()
     const deltaTime = state.clock.getDelta()
 
@@ -215,9 +215,12 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
     animationState.current.lastScrollY = scrollY
 
     // Target values based on scroll with velocity influence
-    const targetRotationSpeed = 0.05 - Math.min(0.03, scrollY / 8000) + Math.abs(scrollVelocity) * 0.00005
-    const targetInnerRotationSpeed = -0.03 - Math.min(0.02, scrollY / 10000) - Math.abs(scrollVelocity) * 0.00003
-    const targetOuterRotationSpeed = 0.02 - Math.min(0.01, scrollY / 12000) + Math.abs(scrollVelocity) * 0.00002
+    const targetRotationSpeed =
+      0.05 - Math.min(0.03, scrollY / 8000) + Math.abs(scrollVelocity) * 0.00005
+    const targetInnerRotationSpeed =
+      -0.03 - Math.min(0.02, scrollY / 10000) - Math.abs(scrollVelocity) * 0.00003
+    const targetOuterRotationSpeed =
+      0.02 - Math.min(0.01, scrollY / 12000) + Math.abs(scrollVelocity) * 0.00002
     const targetGlowIntensity = 1.2 - Math.min(0.3, scrollY / 3000)
 
     // Adaptive smoothing based on frame rate
@@ -229,7 +232,8 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
 
     // Smoother scroll response for x rotation
     const targetXRotation = scrollY * 0.00005 // More subtle
-    animationState.current.rotation.x += (targetXRotation - animationState.current.rotation.x) * adaptiveLerpFactor
+    animationState.current.rotation.x +=
+      (targetXRotation - animationState.current.rotation.x) * adaptiveLerpFactor
 
     // Update ring rotations with adaptive lerp
     animationState.current.innerRotation += targetInnerRotationSpeed * deltaTime * 60 * 0.01
@@ -264,8 +268,8 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
   useEffect(() => {
     return () => {
       // Dispose of geometries and materials to prevent memory leaks
-      Object.values(geometries).forEach((geometry) => geometry.dispose())
-      Object.values(materials).forEach((material) => material.dispose())
+      Object.values(geometries).forEach(geometry => geometry.dispose())
+      Object.values(materials).forEach(material => material.dispose())
     }
   }, [geometries, materials])
 
@@ -273,7 +277,7 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
   const ParticleField = useMemo(() => {
     const positions = new Float32Array(200 * 3)
     const sizes = new Float32Array(200)
-    
+
     for (let i = 0; i < 200; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 10
       positions[i * 3 + 1] = (Math.random() - 0.5) * 10
@@ -284,21 +288,10 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
     return (
       <points>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[positions, 3]}
-          />
-          <bufferAttribute
-            attach="attributes-size"
-            args={[sizes, 1]}
-          />
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
         </bufferGeometry>
-        <pointsMaterial
-          sizeAttenuation={true}
-          color="#9C9C9C"
-          transparent
-          opacity={0.6}
-        />
+        <pointsMaterial sizeAttenuation={true} color="#9C9C9C" transparent opacity={0.6} />
       </points>
     )
   }, [])
@@ -316,7 +309,11 @@ function PortalEffect({ scrollY }: { scrollY: number }) {
         />
 
         {/* Middle ring */}
-        <mesh material={materials.middleRingMaterial} geometry={geometries.middleRing} renderOrder={1} />
+        <mesh
+          material={materials.middleRingMaterial}
+          geometry={geometries.middleRing}
+          renderOrder={1}
+        />
 
         {/* Outer ring */}
         <mesh

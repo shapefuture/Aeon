@@ -1,23 +1,59 @@
-"use client"
+'use client'
 
-import { useRef, useEffect, useMemo, useCallback } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { Stars, useTexture, AdaptiveDpr, PerformanceMonitor } from "@react-three/drei"
-import * as THREE from "three"
+import { useRef, useEffect, useMemo, useCallback, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Stars, useTexture, AdaptiveDpr, PerformanceMonitor } from '@react-three/drei'
+import * as THREE from 'three'
+import { logger } from '@/lib/logger'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 interface BlackHoleSceneProps {
   scrollY: number
 }
 
+// Logger instance for the BlackHoleScene component
+const sceneLogger = logger.child('BlackHoleScene')
+
+/**
+ * Main BlackHoleScene component wrapped with ErrorBoundary
+ */
 export function BlackHoleScene({ scrollY }: BlackHoleSceneProps) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="w-full h-full flex items-center justify-center bg-black text-white">
+          <p>Failed to load 3D scene. Please refresh the page.</p>
+        </div>
+      }
+    >
+      <BlackHoleSceneContent scrollY={scrollY} />
+    </ErrorBoundary>
+  )
+}
+
+/**
+ * Inner content of the BlackHoleScene separated for error boundary
+ */
+function BlackHoleSceneContent({ scrollY }: BlackHoleSceneProps) {
   // Use a ref to track if the component is mounted to avoid memory leaks
   const mountedRef = useRef(true)
 
+  // Track initialization errors
+  const [initError, setInitError] = useState<Error | null>(null)
+
   useEffect(() => {
+    sceneLogger.debug('BlackHoleScene mounted')
+
     return () => {
       mountedRef.current = false
+      sceneLogger.debug('BlackHoleScene unmounted')
     }
   }, [])
+
+  // If we encountered an initialization error, throw it to be caught by the ErrorBoundary
+  if (initError) {
+    throw initError
+  }
 
   return (
     <Canvas
@@ -25,10 +61,15 @@ export function BlackHoleScene({ scrollY }: BlackHoleSceneProps) {
       gl={{
         antialias: true,
         alpha: true,
-        powerPreference: "high-performance",
+        powerPreference: 'high-performance',
         // Disable depth testing for better blending of transparent objects
         depth: false,
         stencil: false,
+      }}
+      onError={e => {
+        const error = e instanceof Error ? e : new Error('Canvas error occurred')
+        sceneLogger.error('Canvas error:', error)
+        setInitError(error)
       }}
     >
       {/* Adaptive DPR adjusts pixel ratio based on device performance */}
@@ -36,13 +77,15 @@ export function BlackHoleScene({ scrollY }: BlackHoleSceneProps) {
 
       {/* Performance monitor to adjust quality based on frame rate */}
       <PerformanceMonitor
-        onDecline={(api) => {
+        onDecline={api => {
           // The performance monitor passes an API object, not a direct fps value
-          console.log("Performance declining, reducing quality")
-          if (typeof api === "object" && api !== null) {
+          sceneLogger.warn('Performance declining, reducing quality')
+          if (typeof api === 'object' && api !== null) {
             // Safely access fps if it exists in the API object
             const fps = api.fps !== undefined ? api.fps : 0
-            console.log(`Current FPS: ${typeof fps === "number" ? fps.toFixed(2) : "unknown"} FPS`)
+            sceneLogger.info(
+              `Current FPS: ${typeof fps === 'number' ? fps.toFixed(2) : 'unknown'} FPS`
+            )
           }
         }}
       >
@@ -60,7 +103,7 @@ interface BlackHoleProps {
 // Wrapper component that handles performance optimization
 function BlackHoleWithPerformanceOptimization({ scrollY }: BlackHoleProps) {
   const { gl, scene, camera } = useThree()
-  const [quality, setQuality] = useState<"high" | "medium" | "low">("high")
+  const [quality, setQuality] = useState<'high' | 'medium' | 'low'>('high')
 
   const animate = useCallback(() => {
     gl.render(scene, camera)
@@ -77,10 +120,10 @@ function BlackHoleWithPerformanceOptimization({ scrollY }: BlackHoleProps) {
       }
     }
 
-    document.addEventListener("visibilitychange", handleVisibilityChange)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       gl.setAnimationLoop(null)
     }
   }, [gl, animate])
@@ -90,25 +133,30 @@ function BlackHoleWithPerformanceOptimization({ scrollY }: BlackHoleProps) {
     // Check if device is low-powered
     const isLowPowered = () => {
       const userAgent = navigator.userAgent
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        userAgent
+      )
       const isOldDevice = /iPhone\s(5|6|7|8)/i.test(userAgent) || /iPad\s(1|2|3|4)/i.test(userAgent)
 
       return isMobile && isOldDevice
     }
 
     if (isLowPowered()) {
-      setQuality("low")
+      setQuality('low')
     }
   }, [])
 
   return <BlackHole scrollY={scrollY} quality={quality} />
 }
 
-function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "low" | "medium" | "high" }) {
+function BlackHole({
+  scrollY,
+  quality = 'high',
+}: BlackHoleProps & { quality?: 'low' | 'medium' | 'high' }) {
   const blackHoleRef = useRef<THREE.Group>(null)
   const diskRef = useRef<THREE.Mesh>(null)
   const glowRef = useRef<THREE.Mesh>(null)
-  const { size, viewport } = useThree()
+  const { viewport } = useThree() // size is unused but may be needed in future updates
 
   // Animation state refs for smooth transitions
   const animationState = useRef({
@@ -126,8 +174,8 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
   // Memoize geometry to prevent recreation on each render
   const geometries = useMemo(() => {
     // Adjust detail level based on quality
-    const sphereDetail = quality === "high" ? 64 : quality === "medium" ? 32 : 16
-    const ringDetail = quality === "high" ? 64 : quality === "medium" ? 32 : 16
+    const sphereDetail = quality === 'high' ? 64 : quality === 'medium' ? 32 : 16
+    const ringDetail = quality === 'high' ? 64 : quality === 'medium' ? 32 : 16
 
     return {
       blackHoleSphere: new THREE.SphereGeometry(1, sphereDetail, sphereDetail),
@@ -136,23 +184,30 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
     }
   }, [quality])
 
-  // Create textures for the accretion disk - memoized to prevent recreation
-  const diskTexture = useTexture("/icons/icon-512x512.png") // Using existing app icon as fallback texture
+  // Load texture outside of callbacks to avoid React Hooks rules violations
+  const diskTexture = useTexture('/icons/icon-512x512.png')
+
+  // Handle texture loading errors
+  useEffect(() => {
+    if (!diskTexture) {
+      sceneLogger.error('Failed to load disk texture')
+    }
+  }, [diskTexture])
 
   // Create materials with optimized shaders based on quality
   const materials = useMemo(() => {
     // Simplified shader for low quality
     const getFragmentShaderComplexity = () => {
-      if (quality === "low") {
+      if (quality === 'low') {
         return `
           uniform float time;
           uniform vec3 glowColor;
           uniform float glowIntensity;
-          
+
           varying vec3 vPosition;
           varying vec3 vNormal;
           varying vec2 vUv;
-          
+
           void main() {
             // Simplified calculation for low-end devices
             float rimFactor = 0.5;
@@ -170,35 +225,35 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
         uniform float time;
         uniform vec3 glowColor;
         uniform float glowIntensity;
-        
+
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec2 vUv;
-        
+
         void main() {
           // Calculate rim lighting effect for the event horizon glow
           float rimPower = 2.0;
           vec3 viewDir = normalize(cameraPosition - vPosition);
           float rimFactor = 1.0 - max(0.0, dot(viewDir, vNormal));
           rimFactor = pow(rimFactor, rimPower);
-          
+
           // Create pulsating glow effect - optimized for smoothness
-          float pulseSpeed = 0.8; 
+          float pulseSpeed = 0.8;
           float pulseIntensity = 0.12;
           float pulse = 1.0 + pulseIntensity * sin(time * pulseSpeed);
-          
+
           // Combine effects
           vec3 glowEffect = glowColor * rimFactor * pulse * glowIntensity;
-          
+
           // Core of black hole is pure black
           vec3 blackHoleColor = vec3(0.0, 0.0, 0.0);
-          
+
           // Blend between black hole and glow based on distance from center
           float distFromCenter = length(vUv - vec2(0.5, 0.5)) * 2.0;
           float glowMask = smoothstep(0.7, 1.0, distFromCenter);
-          
+
           vec3 finalColor = mix(blackHoleColor, glowEffect, glowMask);
-          
+
           gl_FragColor = vec4(finalColor, 1.0);
         }
       `
@@ -214,7 +269,7 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec2 vUv;
-        
+
         void main() {
           vPosition = position;
           vNormal = normalize(normalMatrix * normal);
@@ -228,12 +283,12 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
 
     // Simplified disk shader for low quality
     const getDiskShaderComplexity = () => {
-      if (quality === "low") {
+      if (quality === 'low') {
         return `
           uniform float time;
           uniform sampler2D baseTexture;
           varying vec2 vUv;
-          
+
           void main() {
             // Simplified calculation for low-end devices
             vec2 center = vec2(0.5, 0.5);
@@ -251,32 +306,32 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
         uniform float time;
         uniform sampler2D baseTexture;
         varying vec2 vUv;
-        
+
         void main() {
           // Calculate distance from center
           vec2 center = vec2(0.5, 0.5);
           float dist = distance(vUv, center);
-          
+
           // Create swirling effect with smoother animation
           float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
           float swirl = sin(angle * 6.0 + time * 1.2) * 0.5 + 0.5; // Reduced frequency and speed
-          
+
           // Create color gradient based on distance and swirl
           vec3 innerColor = vec3(1.0, 0.5, 1.0); // Purple-pink
           vec3 outerColor = vec3(0.2, 0.0, 0.5); // Deep purple
           vec3 color = mix(innerColor, outerColor, dist * 2.0);
-          
+
           // Add some brightness variation with smoother transition
           float brightness = 1.0 + 0.15 * sin(dist * 12.0 + time * 0.6); // Reduced frequency
           color *= brightness;
-          
+
           // Add glow at inner edge
           float innerGlow = smoothstep(0.2, 0.4, 1.0 - dist * 2.0);
           color += vec3(1.0, 0.7, 1.0) * innerGlow * 0.8;
-          
+
           // Mask out the inner part (black hole) with smoother transition
           float alpha = smoothstep(0.1, 0.25, dist) * smoothstep(1.0, 0.75, dist);
-          
+
           gl_FragColor = vec4(color, alpha);
         }
       `
@@ -289,7 +344,7 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
       },
       vertexShader: `
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -303,15 +358,15 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
 
     // Simplified glow shader for low quality
     const getGlowShaderComplexity = () => {
-      if (quality === "low") {
+      if (quality === 'low') {
         return `
           uniform float time;
           uniform vec3 glowColor;
           uniform float glowIntensity;
-          
+
           varying vec3 vPosition;
           varying vec3 vNormal;
-          
+
           void main() {
             // Simplified calculation for low-end devices
             float dist = length(vPosition);
@@ -327,25 +382,25 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
         uniform float time;
         uniform vec3 glowColor;
         uniform float glowIntensity;
-        
+
         varying vec3 vPosition;
         varying vec3 vNormal;
-        
+
         void main() {
           // Calculate distance from center
           float dist = length(vPosition);
-          
+
           // Create pulsating effect with smoother animation
           float pulse = 1.0 + 0.12 * sin(time * 0.8); // Reduced frequency and intensity
-          
+
           // Create radial gradient with smoother falloff
           float gradient = 1.0 - smoothstep(0.0, 1.0, dist);
           gradient = pow(gradient, 1.5); // Softer falloff
-          
+
           // Final color with pulsating effect
           vec3 finalColor = glowColor * gradient * pulse * glowIntensity;
           float alpha = gradient * 0.6;
-          
+
           gl_FragColor = vec4(finalColor, alpha);
         }
       `
@@ -360,7 +415,7 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
       vertexShader: `
         varying vec3 vPosition;
         varying vec3 vNormal;
-        
+
         void main() {
           vNormal = normalize(normalMatrix * normal);
           vPosition = position;
@@ -380,7 +435,7 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
   // Stars component with optimized settings
   const OptimizedStars = useMemo(() => {
     // Adjust star count based on quality
-    const starCount = quality === "high" ? 3000 : quality === "medium" ? 1500 : 800
+    const starCount = quality === 'high' ? 3000 : quality === 'medium' ? 1500 : 800
 
     return (
       <Stars
@@ -396,7 +451,7 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
   }, [quality])
 
   // Animation loop with frame timing and smooth interpolation
-  useFrame((state) => {
+  useFrame(state => {
     const time = state.clock.getElapsedTime()
     const deltaTime = state.clock.getDelta()
 
@@ -412,8 +467,10 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
     animationState.current.lastScrollY = scrollY
 
     // Target values based on scroll with velocity influence
-    const targetRotationSpeed = 0.2 - Math.min(0.15, scrollY / 5000) + Math.abs(scrollVelocity) * 0.0001
-    const targetDiskRotationSpeed = 0.1 - Math.min(0.08, scrollY / 8000) + Math.abs(scrollVelocity) * 0.00005
+    const targetRotationSpeed =
+      0.2 - Math.min(0.15, scrollY / 5000) + Math.abs(scrollVelocity) * 0.0001
+    const targetDiskRotationSpeed =
+      0.1 - Math.min(0.08, scrollY / 8000) + Math.abs(scrollVelocity) * 0.00005
     const targetGlowIntensity = 1.5 - Math.min(0.5, scrollY / 2000)
 
     // Adaptive smoothing based on frame rate
@@ -426,7 +483,8 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
 
     // Smoother scroll response for x rotation
     const targetXRotation = scrollY * 0.0001
-    animationState.current.rotation.x += (targetXRotation - animationState.current.rotation.x) * adaptiveLerpFactor
+    animationState.current.rotation.x +=
+      (targetXRotation - animationState.current.rotation.x) * adaptiveLerpFactor
 
     // Update disk rotation with adaptive lerp
     animationState.current.diskRotation += targetDiskRotationSpeed * deltaTime * 60 * 0.01 // Normalize by frame rate
@@ -459,8 +517,8 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
   useEffect(() => {
     return () => {
       // Dispose of geometries and materials to prevent memory leaks
-      Object.values(geometries).forEach((geometry) => geometry.dispose())
-      Object.values(materials).forEach((material) => material.dispose())
+      Object.values(geometries).forEach(geometry => geometry.dispose())
+      Object.values(materials).forEach(material => material.dispose())
     }
   }, [geometries, materials])
 
@@ -492,5 +550,4 @@ function BlackHole({ scrollY, quality = "high" }: BlackHoleProps & { quality?: "
   )
 }
 
-// Import useState at the top
-import { useState } from "react"
+// useState is now imported at the top of the file

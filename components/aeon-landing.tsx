@@ -1,13 +1,54 @@
-"use client"
+'use client'
 
-import { useEffect, useState, useRef, useMemo } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { EnchantedUniverse } from "@/components/enchanted-universe"
-import { useDebounce } from "@/hooks/use-debounce"
-import { ArrowRight, Plus } from "lucide-react"
+import { useEffect, useState, useRef, useMemo } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { EnchantedUniverse } from '@/components/enchanted-universe'
+import { useDebounce } from '@/hooks/use-debounce'
+import { ArrowRight, Plus } from 'lucide-react'
+import { logger } from '@/lib/logger'
+import { tryCatch, tryCatchSync } from '@/lib/errors'
+import { ErrorBoundary } from '@/components/error-boundary'
 
+// Logger instance for the AeonLanding component
+const landingLogger = logger.child('AeonLanding')
+
+/**
+ * Main landing page component for Aeon website
+ */
 export function AeonLanding() {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="min-h-screen bg-[#0C0C0C] text-[#F4F2F1] flex items-center justify-center">
+          <div className="text-center p-8">
+            <h1 className="text-3xl mb-4">Something went wrong</h1>
+            <p className="mb-6">
+              We're experiencing technical difficulties. Please refresh the page.
+            </p>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="border-[#9C9C9C] text-[#F4F2F1] hover:bg-[#F4F2F1]/5 rounded-none"
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      }
+      onError={error => {
+        landingLogger.error('AeonLanding error:', error)
+      }}
+    >
+      <AeonLandingContent />
+    </ErrorBoundary>
+  )
+}
+
+/**
+ * Inner content of the AeonLanding component separated for error boundary
+ */
+function AeonLandingContent() {
   // State for scroll position and cursor
   const [scrollY, setScrollY] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
@@ -29,14 +70,31 @@ export function AeonLanding() {
 
   // Handle cursor movement
   useEffect(() => {
+    landingLogger.debug('AeonLanding mounted')
+
     const handleMouseMove = (e: MouseEvent) => {
       setCursorPosition({ x: e.clientX, y: e.clientY })
     }
 
-    window.addEventListener("mousemove", handleMouseMove)
+    tryCatchSync(
+      () => {
+        window.addEventListener('mousemove', handleMouseMove)
+      },
+      error => {
+        landingLogger.error('Error adding mousemove event listener:', error)
+      }
+    )
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
+      tryCatchSync(
+        () => {
+          window.removeEventListener('mousemove', handleMouseMove)
+          landingLogger.debug('AeonLanding unmounted')
+        },
+        error => {
+          landingLogger.error('Error removing mousemove event listener:', error)
+        }
+      )
     }
   }, [])
 
@@ -54,8 +112,8 @@ export function AeonLanding() {
       // Update the target position
       targetScrollY = window.scrollY
 
-      // Calculate scroll velocity
-      const scrollVelocity = targetScrollY - prevScrollY.current
+      // Calculate scroll velocity (unused but kept for future use)
+      // const scrollVelocity = targetScrollY - prevScrollY.current
       prevScrollY.current = targetScrollY
 
       // Set scrolling state for potential optimizations
@@ -94,11 +152,11 @@ export function AeonLanding() {
     rafRef.current = requestAnimationFrame(animate)
 
     // Use passive listener for better performance
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
 
     // Cleanup
     return () => {
-      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener('scroll', handleScroll)
 
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current)
@@ -135,21 +193,48 @@ export function AeonLanding() {
   // Handle glyph reveal
   const revealGlyph = (glyphId: string) => {
     setRevealedGlyph(glyphId)
+    landingLogger.info(`Revealing glyph: ${glyphId}`)
 
     // Play audio whisper if it's a patron glyph
-    if (glyphId === "patrons" && audioRef.current) {
-      audioRef.current.play()
-      setAudioPlaying("patron")
+    if (glyphId === 'patrons' && audioRef.current) {
+      tryCatch(
+        async () => {
+          try {
+            await audioRef.current?.play()
+            setAudioPlaying('patron')
+            landingLogger.debug('Audio started playing')
+          } catch (error) {
+            landingLogger.error('Error playing audio:', error)
+            // Still set the state even if audio fails
+            setAudioPlaying('patron')
+          }
+        },
+        error => {
+          landingLogger.error('Error in audio playback:', error)
+        }
+      )
     }
 
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       setRevealedGlyph(null)
       setAudioPlaying(null)
+
       if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.currentTime = 0
+        tryCatchSync(
+          () => {
+            audioRef.current!.pause()
+            audioRef.current!.currentTime = 0
+            landingLogger.debug('Audio stopped')
+          },
+          error => {
+            landingLogger.error('Error stopping audio:', error)
+          }
+        )
       }
     }, 8000)
+
+    // Store the timer ID for cleanup if needed
+    return timerId
   }
 
   return (
@@ -158,12 +243,12 @@ export function AeonLanding() {
       <div
         ref={cursorRef}
         className={`fixed w-8 h-8 pointer-events-none z-50 mix-blend-difference transition-all duration-300 ${
-          isHoveringArt ? "scale-[2.5] opacity-80" : "scale-100 opacity-60"
+          isHoveringArt ? 'scale-[2.5] opacity-80' : 'scale-100 opacity-60'
         }`}
         style={{
           transform: `translate(${cursorPosition.x - 16}px, ${cursorPosition.y - 16}px)`,
-          border: "1px solid #F4F2F1",
-          borderRadius: "50%",
+          border: '1px solid #F4F2F1',
+          borderRadius: '50%',
         }}
       >
         {isHoveringArt && (
@@ -189,16 +274,28 @@ export function AeonLanding() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#what-we-do" className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase">
+            <Link
+              href="#what-we-do"
+              className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase"
+            >
               Process
             </Link>
-            <Link href="#for-whom" className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase">
+            <Link
+              href="#for-whom"
+              className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase"
+            >
               Patrons
             </Link>
-            <Link href="#artists" className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase">
+            <Link
+              href="#artists"
+              className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase"
+            >
               Artists
             </Link>
-            <Link href="#contact" className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase">
+            <Link
+              href="#contact"
+              className="text-sm text-[#9C9C9C] hover:text-[#F4F2F1] tracking-wider uppercase"
+            >
               Contact
             </Link>
           </nav>
@@ -219,7 +316,7 @@ export function AeonLanding() {
         ref={heroRef}
         className="relative h-screen flex items-center justify-center overflow-hidden"
         style={{
-          background: "linear-gradient(to bottom, #0C0C0C, #0C0C0C)",
+          background: 'linear-gradient(to bottom, #0C0C0C, #0C0C0C)',
         }}
       >
         {/* Enchanted Universe Animation */}
@@ -228,7 +325,7 @@ export function AeonLanding() {
           style={{
             transform: `scale(${parallaxValues.universeScale})`,
             opacity: parallaxValues.universeOpacity,
-            willChange: isScrolling ? "transform, opacity" : "auto",
+            willChange: isScrolling ? 'transform, opacity' : 'auto',
           }}
         >
           <EnchantedUniverse scrollY={debouncedScrollY} />
@@ -240,11 +337,13 @@ export function AeonLanding() {
           style={{
             transform: `translateY(${parallaxValues.heroContentTranslate}px)`,
             opacity: parallaxValues.heroContentOpacity,
-            willChange: isScrolling ? "transform, opacity" : "auto",
+            willChange: isScrolling ? 'transform, opacity' : 'auto',
           }}
         >
           <div className="mb-12 opacity-80">
-            <span className="text-xs tracking-[0.3em] uppercase text-[#9C9C9C]">Private Atelier</span>
+            <span className="text-xs tracking-[0.3em] uppercase text-[#9C9C9C]">
+              Private Atelier
+            </span>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-light mb-8 leading-tight">
@@ -254,8 +353,8 @@ export function AeonLanding() {
           </h1>
 
           <p className="text-lg text-[#9C9C9C] max-w-2xl mx-auto mb-12 font-sans">
-            Bespoke experiences and symbolic artifacts, co-created with boundary-pushing contemporary artists. Designed
-            to reflect who you are—or who you are becoming.
+            Bespoke experiences and symbolic artifacts, co-created with boundary-pushing
+            contemporary artists. Designed to reflect who you are—or who you are becoming.
           </p>
 
           <div className="flex justify-center">
@@ -263,10 +362,20 @@ export function AeonLanding() {
               variant="outline"
               className="border-[#9C9C9C] text-[#F4F2F1] hover:bg-[#F4F2F1]/5 rounded-none group"
               onClick={() => {
-                const whatWeDoSection = document.getElementById("what-we-do")
-                if (whatWeDoSection) {
-                  whatWeDoSection.scrollIntoView({ behavior: "smooth" })
-                }
+                tryCatchSync(
+                  () => {
+                    const whatWeDoSection = document.getElementById('what-we-do')
+                    if (whatWeDoSection) {
+                      whatWeDoSection.scrollIntoView({ behavior: 'smooth' })
+                      landingLogger.debug('Scrolled to what-we-do section')
+                    } else {
+                      landingLogger.warn('what-we-do section not found')
+                    }
+                  },
+                  error => {
+                    landingLogger.error('Error scrolling to section:', error)
+                  }
+                )
               }}
             >
               <span className="text-xs tracking-widest uppercase mr-2">Begin The Discovery</span>
@@ -278,7 +387,7 @@ export function AeonLanding() {
         {/* Hidden glyph */}
         <div
           className="absolute bottom-12 right-12 w-6 h-6 cursor-pointer opacity-20 hover:opacity-60 transition-opacity duration-500"
-          onClick={() => revealGlyph("manifesto")}
+          onClick={() => revealGlyph('manifesto')}
         >
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -335,8 +444,8 @@ export function AeonLanding() {
               </ul>
 
               <p className="text-[#9C9C9C] pt-4">
-                Each project is a collaboration between you, a dedicated curator, and a global network of
-                transdisciplinary artists.
+                Each project is a collaboration between you, a dedicated curator, and a global
+                network of transdisciplinary artists.
               </p>
             </div>
 
@@ -348,7 +457,10 @@ export function AeonLanding() {
             >
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIj48L3N2Zz4=')" }}
+                style={{
+                  backgroundImage:
+                    "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIj48L3N2Zz4=')",
+                }}
               ></div>
               <div className="absolute inset-0 bg-[#0C0C0C]/60"></div>
               <div className="absolute bottom-0 left-0 p-6">
@@ -399,14 +511,16 @@ export function AeonLanding() {
 
               <div className="space-y-4">
                 <h3 className="text-lg tracking-wider uppercase">Institutions</h3>
-                <p className="text-sm text-[#9C9C9C] font-sans">Launching transcendent, unsellable experiences.</p>
+                <p className="text-sm text-[#9C9C9C] font-sans">
+                  Launching transcendent, unsellable experiences.
+                </p>
               </div>
             </div>
 
             {/* Hidden glyph */}
             <div
               className="relative w-12 h-12 mx-auto mt-16 cursor-pointer opacity-30 hover:opacity-80 transition-opacity duration-500"
-              onClick={() => revealGlyph("patrons")}
+              onClick={() => revealGlyph('patrons')}
             >
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" stroke="#9C9C9C" strokeWidth="1" />
@@ -422,7 +536,9 @@ export function AeonLanding() {
       <section id="process" className="py-24 bg-[#0C0C0C]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-light mb-12 text-center">How The Invisible Becomes Real</h2>
+            <h2 className="text-3xl font-light mb-12 text-center">
+              How The Invisible Becomes Real
+            </h2>
 
             <div className="space-y-16">
               <div className="flex flex-col md:flex-row items-start gap-8">
@@ -444,7 +560,8 @@ export function AeonLanding() {
                 <div>
                   <h3 className="text-lg tracking-wider uppercase mb-3">Interpretation</h3>
                   <p className="text-[#9C9C9C] font-sans">
-                    Our curators translate it into symbolic, aesthetic, and experiential coordinates.
+                    Our curators translate it into symbolic, aesthetic, and experiential
+                    coordinates.
                   </p>
                 </div>
               </div>
@@ -489,7 +606,9 @@ export function AeonLanding() {
                 variant="outline"
                 className="border-[#9C9C9C] text-[#F4F2F1] hover:bg-[#F4F2F1]/5 rounded-none group"
               >
-                <span className="text-xs tracking-widest uppercase mr-2">Explore a Sample Journey</span>
+                <span className="text-xs tracking-widest uppercase mr-2">
+                  Explore a Sample Journey
+                </span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
@@ -505,7 +624,9 @@ export function AeonLanding() {
 
             <div className="space-y-6 text-center font-sans">
               <p className="text-[#9C9C9C]">Every project is protected by non-disclosure.</p>
-              <p className="text-[#9C9C9C]">You may never meet the artist. Or meet only in voice.</p>
+              <p className="text-[#9C9C9C]">
+                You may never meet the artist. Or meet only in voice.
+              </p>
               <p className="text-[#9C9C9C]">The work may remain hidden, coded, or destructible.</p>
               <p className="text-[#9C9C9C]">This is luxury without trace—art as stealth signal.</p>
             </div>
@@ -517,7 +638,9 @@ export function AeonLanding() {
       <section id="artists" className="py-24 bg-[#0C0C0C]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-light mb-12 text-center">100+ Global Artists. Zero Public Rosters.</h2>
+            <h2 className="text-3xl font-light mb-12 text-center">
+              100+ Global Artists. Zero Public Rosters.
+            </h2>
 
             <div className="mb-12 font-sans">
               <p className="text-[#9C9C9C] mb-6">We work across:</p>
@@ -536,7 +659,7 @@ export function AeonLanding() {
 
             {/* Artist fragments grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-16">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3].map(i => (
                 <div
                   key={i}
                   className="relative aspect-square overflow-hidden group cursor-pointer"
@@ -545,14 +668,18 @@ export function AeonLanding() {
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-110"
-                    style={{ backgroundImage: `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48L3N2Zz4=')` }}
+                    style={{
+                      backgroundImage: `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48L3N2Zz4=')`,
+                    }}
                   ></div>
                   <div className="absolute inset-0 bg-[#0C0C0C]/60 group-hover:bg-[#0C0C0C]/40 transition-all duration-700"></div>
                   <div className="absolute bottom-0 left-0 p-4 w-full">
-                    <p className="text-xs tracking-widest uppercase text-[#9C9C9C] mb-2">Artist Fragment</p>
+                    <p className="text-xs tracking-widest uppercase text-[#9C9C9C] mb-2">
+                      Artist Fragment
+                    </p>
                     <p className="text-sm italic opacity-0 group-hover:opacity-100 transition-opacity duration-700">
                       {i === 1
-                        ? "My material is memory."
+                        ? 'My material is memory.'
                         : i === 2
                           ? "The artifact knows when it's complete."
                           : "I don't paint your face. I paint what survived your childhood."}
@@ -565,7 +692,7 @@ export function AeonLanding() {
             {/* Hidden glyph */}
             <div
               className="relative w-12 h-12 mx-auto mt-16 cursor-pointer opacity-30 hover:opacity-80 transition-opacity duration-500"
-              onClick={() => revealGlyph("artists")}
+              onClick={() => revealGlyph('artists')}
             >
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -588,11 +715,16 @@ export function AeonLanding() {
             <h2 className="text-3xl font-light mb-6 text-center">
               You don't need to know what you want. You need to know it's time.
             </h2>
-            <p className="text-[#9C9C9C] text-center mb-12 font-sans">One conversation can begin the alchemy.</p>
+            <p className="text-[#9C9C9C] text-center mb-12 font-sans">
+              One conversation can begin the alchemy.
+            </p>
 
             <form className="space-y-8">
               <div className="space-y-4">
-                <label htmlFor="name" className="block text-xs tracking-widest uppercase text-[#9C9C9C]">
+                <label
+                  htmlFor="name"
+                  className="block text-xs tracking-widest uppercase text-[#9C9C9C]"
+                >
                   Name
                 </label>
                 <input
@@ -603,7 +735,10 @@ export function AeonLanding() {
               </div>
 
               <div className="space-y-4">
-                <label htmlFor="contact" className="block text-xs tracking-widest uppercase text-[#9C9C9C]">
+                <label
+                  htmlFor="contact"
+                  className="block text-xs tracking-widest uppercase text-[#9C9C9C]"
+                >
                   Private Contact (phone/email)
                 </label>
                 <input
@@ -614,7 +749,10 @@ export function AeonLanding() {
               </div>
 
               <div className="space-y-4">
-                <label htmlFor="question" className="block text-xs tracking-widest uppercase text-[#9C9C9C]">
+                <label
+                  htmlFor="question"
+                  className="block text-xs tracking-widest uppercase text-[#9C9C9C]"
+                >
                   What has no place in your current life—but refuses to leave you?
                 </label>
                 <textarea
@@ -661,17 +799,23 @@ export function AeonLanding() {
           <div className="max-w-lg p-8 border border-[#9C9C9C] bg-[#0C0C0C]">
             <div className="mb-6 flex justify-between items-center">
               <h3 className="text-lg tracking-wider uppercase">
-                {revealedGlyph === "manifesto"
-                  ? "Manifesto Fragment"
-                  : revealedGlyph === "patrons"
-                    ? "Patron Whispers"
-                    : "Artist Shadows"}
+                {revealedGlyph === 'manifesto'
+                  ? 'Manifesto Fragment'
+                  : revealedGlyph === 'patrons'
+                    ? 'Patron Whispers'
+                    : 'Artist Shadows'}
               </h3>
               <button
                 onClick={() => setRevealedGlyph(null)}
                 className="text-[#9C9C9C] hover:text-[#F4F2F1] transition-colors"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path d="M18 6L6 18" stroke="currentColor" strokeWidth="1" />
                   <path d="M6 6L18 18" stroke="currentColor" strokeWidth="1" />
                 </svg>
@@ -679,18 +823,20 @@ export function AeonLanding() {
             </div>
 
             <div className="font-sans text-[#9C9C9C]">
-              {revealedGlyph === "manifesto" ? (
+              {revealedGlyph === 'manifesto' ? (
                 <p className="italic">
-                  "Art is not what you see, but what you make others see. We create not objects, but revelations—moments
-                  where the veil between what is and what could be becomes translucent. This is our sacred task."
+                  "Art is not what you see, but what you make others see. We create not objects, but
+                  revelations—moments where the veil between what is and what could be becomes
+                  translucent. This is our sacred task."
                 </p>
-              ) : revealedGlyph === "patrons" ? (
+              ) : revealedGlyph === 'patrons' ? (
                 <div>
                   <p className="italic mb-4">
-                    "The piece arrived on the anniversary. No signature, no explanation—just as we agreed. When my
-                    daughter touched it, it began to glow with a light I cannot describe. It knew her. It remembered."
+                    "The piece arrived on the anniversary. No signature, no explanation—just as we
+                    agreed. When my daughter touched it, it began to glow with a light I cannot
+                    describe. It knew her. It remembered."
                   </p>
-                  {audioPlaying === "patron" && (
+                  {audioPlaying === 'patron' && (
                     <div className="flex items-center justify-center mt-6">
                       <div className="w-16 h-1 bg-[#9C9C9C]/30">
                         <div className="h-full w-1/3 bg-[#9C9C9C] animate-pulse"></div>
@@ -701,8 +847,9 @@ export function AeonLanding() {
                 </div>
               ) : (
                 <p className="italic">
-                  "I work blindfolded. I never see their faces. The curator describes not their appearance but their
-                  essence—the weight they carry, the light they seek. This is all I need to know."
+                  "I work blindfolded. I never see their faces. The curator describes not their
+                  appearance but their essence—the weight they carry, the light they seek. This is
+                  all I need to know."
                 </p>
               )}
             </div>
@@ -713,7 +860,7 @@ export function AeonLanding() {
       {/* Soul Cartography Quiz - Hidden Experience */}
       <div
         className="fixed bottom-8 left-8 w-8 h-8 cursor-pointer opacity-20 hover:opacity-60 transition-opacity duration-500 z-30"
-        onClick={() => revealGlyph("soul")}
+        onClick={() => revealGlyph('soul')}
       >
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -721,7 +868,13 @@ export function AeonLanding() {
             stroke="#F4F2F1"
             strokeWidth="1"
           />
-          <path d="M12 8V16M8 12H16" stroke="#F4F2F1" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M12 8V16M8 12H16"
+            stroke="#F4F2F1"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
     </div>

@@ -2,24 +2,24 @@ export function TestimonialSection() {
   const testimonials = [
     {
       quote:
-        "Reflect has completely transformed how I organize my thoughts and research. The connections it helps me make are invaluable.",
-      author: "Sarah Johnson",
-      role: "Product Designer",
-      company: "Figma",
+        'Reflect has completely transformed how I organize my thoughts and research. The connections it helps me make are invaluable.',
+      author: 'Sarah Johnson',
+      role: 'Product Designer',
+      company: 'Figma',
     },
     {
       quote:
-        "As a researcher, I need to connect ideas across different papers and experiments. Reflect makes this process intuitive and powerful.",
-      author: "Dr. Michael Chen",
-      role: "Neuroscientist",
-      company: "Stanford University",
+        'As a researcher, I need to connect ideas across different papers and experiments. Reflect makes this process intuitive and powerful.',
+      author: 'Dr. Michael Chen',
+      role: 'Neuroscientist',
+      company: 'Stanford University',
     },
     {
       quote:
         "I've tried dozens of note-taking apps, but Reflect is the only one that works the way my brain does. It's become essential to my creative process.",
-      author: "Alex Rivera",
-      role: "Content Creator",
-      company: "Independent",
+      author: 'Alex Rivera',
+      role: 'Content Creator',
+      company: 'Independent',
     },
   ]
 
@@ -41,8 +41,17 @@ export function TestimonialSection() {
             >
               <div className="space-y-4">
                 <div className="text-purple-400">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 11L8 17H5L7 11H4V5H10V11ZM20 11L18 17H15L17 11H14V5H20V11Z" fill="currentColor" />
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 11L8 17H5L7 11H4V5H10V11ZM20 11L18 17H15L17 11H14V5H20V11Z"
+                      fill="currentColor"
+                    />
                   </svg>
                 </div>
                 <p className="text-gray-300">{testimonial.quote}</p>

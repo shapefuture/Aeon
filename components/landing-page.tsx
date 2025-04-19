@@ -1,20 +1,22 @@
-"use client"
+'use client'
 
-import { useEffect, useState, useRef, useMemo } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { BlackHoleScene } from "@/components/black-hole-scene"
-import { NoteInterface } from "@/components/note-interface"
-import { FeatureSection } from "@/components/feature-section"
-import { TestimonialSection } from "@/components/testimonial-section"
-import { Footer } from "@/components/footer"
-import { useDebounce } from "@/hooks/use-debounce"
+import { useEffect, useState, useRef, useMemo } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { BlackHoleScene } from '@/components/black-hole-scene'
+import { NoteInterface } from '@/components/note-interface'
+import { FeatureSection } from '@/components/feature-section'
+import { TestimonialSection } from '@/components/testimonial-section'
+import { Footer } from '@/components/footer'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export function LandingPage() {
   // State for scroll position and performance monitoring
   const [scrollY, setScrollY] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
-  const [performanceMode, setPerformanceMode] = useState<"high" | "medium" | "low">("high")
+  // Performance mode is detected but not currently used - will be implemented in future updates
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_performanceMode, setPerformanceMode] = useState<'high' | 'medium' | 'low'>('high')
 
   // Refs for elements and animation
   const heroRef = useRef<HTMLDivElement>(null)
@@ -32,16 +34,19 @@ export function LandingPage() {
     const checkDeviceCapabilities = () => {
       // Check if device is low-powered
       const userAgent = navigator.userAgent
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        userAgent
+      )
       const isOldDevice = /iPhone\s(5|6|7|8)/i.test(userAgent) || /iPad\s(1|2|3|4)/i.test(userAgent)
 
       // Check for low memory devices
-      const lowMemory = (navigator as any).deviceMemory !== undefined && (navigator as any).deviceMemory < 4
+      const lowMemory =
+        (navigator as any).deviceMemory !== undefined && (navigator as any).deviceMemory < 4
 
       if ((isMobile && isOldDevice) || lowMemory) {
-        setPerformanceMode("low")
+        setPerformanceMode('low')
       } else if (isMobile) {
-        setPerformanceMode("medium")
+        setPerformanceMode('medium')
       }
     }
 
@@ -102,11 +107,11 @@ export function LandingPage() {
     rafRef.current = requestAnimationFrame(animate)
 
     // Use passive listener for better performance
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
 
     // Cleanup
     return () => {
-      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener('scroll', handleScroll)
 
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current)
@@ -148,7 +153,13 @@ export function LandingPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path d="M12 4V20M4 12H20" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
@@ -189,7 +200,7 @@ export function LandingPage() {
         ref={heroRef}
         className="relative h-screen flex items-center justify-center overflow-hidden"
         style={{
-          background: "linear-gradient(to bottom, #000000, #1a0b2e)",
+          background: 'linear-gradient(to bottom, #000000, #1a0b2e)',
         }}
       >
         {/* 3D Black Hole with will-change optimization */}
@@ -198,7 +209,7 @@ export function LandingPage() {
           style={{
             transform: `scale(${parallaxValues.blackHoleScale})`,
             opacity: parallaxValues.blackHoleOpacity,
-            willChange: isScrolling ? "transform, opacity" : "auto",
+            willChange: isScrolling ? 'transform, opacity' : 'auto',
           }}
         >
           <BlackHoleScene scrollY={debouncedScrollY} />
@@ -210,18 +221,32 @@ export function LandingPage() {
           style={{
             transform: `translateY(${parallaxValues.heroContentTranslate}px)`,
             opacity: parallaxValues.heroContentOpacity,
-            willChange: isScrolling ? "transform, opacity" : "auto",
+            willChange: isScrolling ? 'transform, opacity' : 'auto',
           }}
         >
           <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 mb-8 backdrop-blur-sm">
             <span className="text-xs">New: Our AI integration just landed</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 5L16 12L9 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 5L16 12L9 19"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-4">Think better with Reflect</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12">Never miss a note, idea or connection.</p>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12">
+            Never miss a note, idea or connection.
+          </p>
 
           <div className="flex flex-wrap justify-center gap-4">
             <Button className="bg-purple-600 hover:bg-purple-700 rounded-full px-6 smooth-transition">
@@ -238,7 +263,13 @@ export function LandingPage() {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M12 5V19M12 19L5 12M12 19L19 12"
               stroke="white"
@@ -254,7 +285,9 @@ export function LandingPage() {
       <section className="py-20 bg-gradient-to-b from-[#1a0b2e] to-[#130821]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Organize your thoughts, effortlessly</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Organize your thoughts, effortlessly
+            </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               Reflect helps you capture, connect, and recall your ideas with ease.
             </p>
@@ -279,7 +312,9 @@ export function LandingPage() {
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
             Join thousands of thinkers, creators, and knowledge workers who use Reflect every day.
           </p>
-          <Button className="bg-purple-600 hover:bg-purple-700 rounded-full px-8 py-6 text-lg">Start Free Trial</Button>
+          <Button className="bg-purple-600 hover:bg-purple-700 rounded-full px-8 py-6 text-lg">
+            Start Free Trial
+          </Button>
         </div>
       </section>
 

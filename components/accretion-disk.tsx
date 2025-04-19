@@ -1,14 +1,14 @@
-"use client"
+'use client'
 
-import { useRef, useMemo } from "react"
-import { useFrame } from "@react-three/fiber"
-import { shaderMaterial } from "@react-three/drei"
+import { useRef, useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { shaderMaterial } from '@react-three/drei'
 // @ts-ignore
-import * as THREE from "three"
-import { extend } from "@react-three/fiber"
+import * as THREE from 'three'
+import { extend } from '@react-three/fiber'
 
 // Type declaration for custom shader material
-declare module "@react-three/fiber" {
+declare module '@react-three/fiber' {
   interface ThreeElements {
     accretionDiskMaterial: React.DetailedHTMLProps<
       React.HTMLAttributes<HTMLElement>,
@@ -91,7 +91,7 @@ const AccretionDiskMaterial = shaderMaterial(
       
       gl_FragColor = vec4(diskColor, alpha);
     }
-  `,
+  `
 )
 
 // Extend the Three.js materials with our custom shader
@@ -119,12 +119,17 @@ interface AccretionDiskProps {
   rotationSpeed: number
 }
 
-export function AccretionDisk({ position, innerRadius, outerRadius, rotationSpeed }: AccretionDiskProps) {
+export function AccretionDisk({
+  position,
+  innerRadius,
+  outerRadius,
+  rotationSpeed,
+}: AccretionDiskProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<any>(null)
 
   // Update the shader uniforms on each frame
-  useFrame((state) => {
+  useFrame(state => {
     if (materialRef.current) {
       materialRef.current.time = state.clock.elapsedTime
       materialRef.current.innerRadius = innerRadius
@@ -144,7 +149,12 @@ export function AccretionDisk({ position, innerRadius, outerRadius, rotationSpee
 
   return (
     <mesh ref={meshRef} position={position} rotation={[Math.PI / 2, 0, 0]} geometry={geometry}>
-      <accretionDiskMaterial ref={materialRef} transparent={true} depthWrite={false} side={THREE.DoubleSide} />
+      <accretionDiskMaterial
+        ref={materialRef}
+        transparent={true}
+        depthWrite={false}
+        side={THREE.DoubleSide}
+      />
     </mesh>
   )
 }

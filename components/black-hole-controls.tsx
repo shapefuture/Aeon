@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { Slider } from "@/components/ui/slider"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Slider } from '@/components/ui/slider'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface BlackHoleControlsProps {
   rotationSpeed: number
@@ -26,7 +26,9 @@ export function BlackHoleControls({
       <Card className="bg-black/70 border-gray-800">
         <CardHeader className="pb-2">
           <CardTitle className="text-white text-lg">Black Hole Controls</CardTitle>
-          <CardDescription className="text-gray-400">Adjust parameters to modify the black hole</CardDescription>
+          <CardDescription className="text-gray-400">
+            Adjust parameters to modify the black hole
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -42,7 +44,7 @@ export function BlackHoleControls({
               max={1}
               step={0.01}
               value={[rotationSpeed]}
-              onValueChange={(value) => setRotationSpeed(value[0])}
+              onValueChange={value => setRotationSpeed(value[0])}
               className="cursor-pointer"
             />
           </div>
@@ -60,7 +62,7 @@ export function BlackHoleControls({
               max={3}
               step={0.1}
               value={[glowIntensity]}
-              onValueChange={(value) => setGlowIntensity(value[0])}
+              onValueChange={value => setGlowIntensity(value[0])}
               className="cursor-pointer"
             />
           </div>
@@ -78,7 +80,7 @@ export function BlackHoleControls({
               max={6}
               step={0.1}
               value={[diskSize]}
-              onValueChange={(value) => setDiskSize(value[0])}
+              onValueChange={value => setDiskSize(value[0])}
               className="cursor-pointer"
             />
           </div>

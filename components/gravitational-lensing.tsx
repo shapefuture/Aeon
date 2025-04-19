@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useRef, useMemo } from "react"
-import { useFrame } from "@react-three/fiber"
-import { shaderMaterial } from "@react-three/drei"
-import * as THREE from "three"
-import { extend } from "@react-three/fiber"
+import { useRef, useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { shaderMaterial } from '@react-three/drei'
+import * as THREE from 'three'
+import { extend } from '@react-three/fiber'
 
 // Gravitational lensing shader material
 const GravitationalLensingMaterial = shaderMaterial(
@@ -57,7 +57,7 @@ const GravitationalLensingMaterial = shaderMaterial(
       
       gl_FragColor = vec4(color, 0.3 * lensEffect);
     }
-  `,
+  `
 )
 
 // Extend the Three.js materials with our custom shader
@@ -78,12 +78,16 @@ interface GravitationalLensingProps {
   lensStrength: number
 }
 
-export function GravitationalLensing({ blackHolePosition, blackHoleRadius, lensStrength }: GravitationalLensingProps) {
+export function GravitationalLensing({
+  blackHolePosition,
+  blackHoleRadius,
+  lensStrength,
+}: GravitationalLensingProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<any>(null)
 
   // Update the shader uniforms on each frame
-  useFrame((state) => {
+  useFrame(state => {
     if (materialRef.current) {
       materialRef.current.time = state.clock.elapsedTime
       materialRef.current.blackHolePosition = new THREE.Vector3(...blackHolePosition)

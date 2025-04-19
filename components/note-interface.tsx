@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Search, ArrowLeft, ArrowRight, Calendar, ChevronDown, Play } from "lucide-react"
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Search, ArrowLeft, ArrowRight, Calendar, ChevronDown, Play } from 'lucide-react'
 
 export function NoteInterface() {
-  const [currentMonth] = useState("April 2023")
-  const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+  const [currentMonth] = useState('April 2023')
+  const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
   // Generate calendar days for April 2023
   const calendarDays = [
@@ -70,12 +70,15 @@ export function NoteInterface() {
           <div className="space-y-4">
             <div className="space-y-1">
               <div className="text-sm">Today I started using Reflect!</div>
-              <div className="text-xs text-gray-500">A note-taking tool designed to mirror the way we think.</div>
+              <div className="text-xs text-gray-500">
+                A note-taking tool designed to mirror the way we think.
+              </div>
             </div>
 
             <div className="space-y-1">
               <div className="text-sm">
-                I love how Reflect helps organize thoughts through connections, instead of hierarchical folders.
+                I love how Reflect helps organize thoughts through connections, instead of
+                hierarchical folders.
               </div>
             </div>
 
@@ -89,7 +92,11 @@ export function NoteInterface() {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <Button variant="ghost" size="icon" className="rounded-full bg-gray-800 hover:bg-gray-700">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full bg-gray-800 hover:bg-gray-700"
+            >
               <Play className="w-4 h-4" />
             </Button>
           </div>
@@ -121,8 +128,8 @@ export function NoteInterface() {
                 key={i}
                 className={`
                   text-xs py-1 rounded-full w-6 h-6 flex items-center justify-center mx-auto
-                  ${day === 2 ? "bg-purple-500 text-white" : "text-gray-300"}
-                  ${day === null ? "invisible" : ""}
+                  ${day === 2 ? 'bg-purple-500 text-white' : 'text-gray-300'}
+                  ${day === null ? 'invisible' : ''}
                 `}
               >
                 {day}

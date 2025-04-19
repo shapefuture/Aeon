@@ -1,4 +1,4 @@
-import Link from "next/link"
+import Link from 'next/link'
 
 export function Footer() {
   return (
@@ -113,14 +113,22 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
             <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path d="M12 4V20M4 12H20" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
             <span className="font-medium">Reflect</span>
           </div>
 
-          <div className="text-gray-400 text-sm">© {new Date().getFullYear()} Reflect. All rights reserved.</div>
+          <div className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} Reflect. All rights reserved.
+          </div>
         </div>
       </div>
     </footer>

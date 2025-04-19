@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useRef, useMemo } from "react"
-import { useFrame } from "@react-three/fiber"
-import { shaderMaterial } from "@react-three/drei"
-import * as THREE from "three"
-import { extend } from "@react-three/fiber"
+import { useRef, useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { shaderMaterial } from '@react-three/drei'
+import * as THREE from 'three'
+import { extend } from '@react-three/fiber'
 
 // Black hole shader material
 const BlackHoleMaterial = shaderMaterial(
@@ -62,7 +62,7 @@ const BlackHoleMaterial = shaderMaterial(
       
       gl_FragColor = vec4(finalColor, 1.0);
     }
-  `,
+  `
 )
 
 // Extend the Three.js materials with our custom shader
@@ -89,7 +89,7 @@ export function BlackHole({ position, radius, rotationSpeed, glowIntensity }: Bl
   const materialRef = useRef<any>(null)
 
   // Update the shader uniforms on each frame
-  useFrame((state) => {
+  useFrame(state => {
     if (materialRef.current) {
       materialRef.current.time = state.clock.elapsedTime
       materialRef.current.glowIntensity = glowIntensity
@@ -104,11 +104,6 @@ export function BlackHole({ position, radius, rotationSpeed, glowIntensity }: Bl
   const geometry = useMemo(() => new THREE.SphereGeometry(radius, 64, 64), [radius])
 
   return (
-    <mesh
-      ref={meshRef}
-      position={position}
-      geometry={geometry}
-      material={materialRef.current}
-    />
+    <mesh ref={meshRef} position={position} geometry={geometry} material={materialRef.current} />
   )
 }

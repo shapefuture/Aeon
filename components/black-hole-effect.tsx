@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from 'react'
 
 export function BlackHoleEffect() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -9,7 +9,7 @@ export function BlackHoleEffect() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext("2d")
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
 
     // Set canvas dimensions
@@ -24,7 +24,7 @@ export function BlackHoleEffect() {
     }
 
     setCanvasDimensions()
-    window.addEventListener("resize", setCanvasDimensions)
+    window.addEventListener('resize', setCanvasDimensions)
 
     // Animation variables
     let animationFrameId: number
@@ -42,10 +42,10 @@ export function BlackHoleEffect() {
 
       // Create the outer glow
       const outerGradient = ctx.createRadialGradient(centerX, centerY, 30, centerX, centerY, 200)
-      outerGradient.addColorStop(0, "rgba(255, 255, 255, 0.8)")
-      outerGradient.addColorStop(0.2, "rgba(200, 150, 255, 0.6)")
-      outerGradient.addColorStop(0.5, "rgba(150, 100, 255, 0.3)")
-      outerGradient.addColorStop(1, "rgba(100, 50, 200, 0)")
+      outerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)')
+      outerGradient.addColorStop(0.2, 'rgba(200, 150, 255, 0.6)')
+      outerGradient.addColorStop(0.5, 'rgba(150, 100, 255, 0.3)')
+      outerGradient.addColorStop(1, 'rgba(100, 50, 200, 0)')
 
       ctx.fillStyle = outerGradient
       ctx.beginPath()
@@ -59,15 +59,22 @@ export function BlackHoleEffect() {
       ctx.beginPath()
       ctx.arc(centerX, centerY, arcRadius, 0, Math.PI, true)
       ctx.lineWidth = 3
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.9)"
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
       ctx.stroke()
 
       // Create the inner glow
-      const innerGradient = ctx.createRadialGradient(centerX, centerY - 10, 0, centerX, centerY, arcRadius)
-      innerGradient.addColorStop(0, "rgba(255, 255, 255, 1)")
-      innerGradient.addColorStop(0.3, "rgba(230, 200, 255, 0.8)")
-      innerGradient.addColorStop(0.7, "rgba(180, 120, 255, 0.4)")
-      innerGradient.addColorStop(1, "rgba(120, 80, 200, 0)")
+      const innerGradient = ctx.createRadialGradient(
+        centerX,
+        centerY - 10,
+        0,
+        centerX,
+        centerY,
+        arcRadius
+      )
+      innerGradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+      innerGradient.addColorStop(0.3, 'rgba(230, 200, 255, 0.8)')
+      innerGradient.addColorStop(0.7, 'rgba(180, 120, 255, 0.4)')
+      innerGradient.addColorStop(1, 'rgba(120, 80, 200, 0)')
 
       // Draw the inner glow
       ctx.fillStyle = innerGradient
@@ -101,7 +108,7 @@ export function BlackHoleEffect() {
       ctx.beginPath()
       ctx.arc(centerX, centerY, pulsatingRadius, 0, Math.PI, true)
       ctx.lineWidth = 1
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
       ctx.stroke()
 
       // Update time and request next frame
@@ -112,7 +119,7 @@ export function BlackHoleEffect() {
     draw()
 
     return () => {
-      window.removeEventListener("resize", setCanvasDimensions)
+      window.removeEventListener('resize', setCanvasDimensions)
       cancelAnimationFrame(animationFrameId)
     }
   }, [])
@@ -122,7 +129,7 @@ export function BlackHoleEffect() {
       ref={canvasRef}
       className="w-full h-[200px]"
       style={{
-        background: "transparent",
+        background: 'transparent',
       }}
     />
   )

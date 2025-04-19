@@ -1,22 +1,60 @@
-"use client"
+'use client'
 
-import { useRef, useEffect, useMemo } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { AdaptiveDpr } from "@react-three/drei"
-import * as THREE from "three"
+import { useRef, useEffect, useMemo, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { AdaptiveDpr } from '@react-three/drei'
+import * as THREE from 'three'
+import { logger } from '@/lib/logger'
+import { tryCatchSync } from '@/lib/errors'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 interface EnchantedUniverseProps {
   scrollY: number
 }
 
+// Logger instance for the EnchantedUniverse component
+const universeLogger = logger.child('EnchantedUniverse')
+
+/**
+ * Main EnchantedUniverse component wrapped with ErrorBoundary
+ */
 export function EnchantedUniverse({ scrollY }: EnchantedUniverseProps) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="w-full h-full flex items-center justify-center bg-black text-white">
+          <p>Failed to load universe animation. Please refresh the page.</p>
+        </div>
+      }
+      onError={error => {
+        universeLogger.error('EnchantedUniverse error:', error)
+      }}
+    >
+      <EnchantedUniverseContent scrollY={scrollY} />
+    </ErrorBoundary>
+  )
+}
+
+/**
+ * Inner content of the EnchantedUniverse separated for error boundary
+ */
+function EnchantedUniverseContent({ scrollY }: EnchantedUniverseProps) {
   const mountedRef = useRef(true)
+  const [initError, setInitError] = useState<Error | null>(null)
 
   useEffect(() => {
+    universeLogger.debug('EnchantedUniverse mounted')
+
     return () => {
       mountedRef.current = false
+      universeLogger.debug('EnchantedUniverse unmounted')
     }
   }, [])
+
+  // If we encountered an initialization error, throw it to be caught by the ErrorBoundary
+  if (initError) {
+    throw initError
+  }
 
   return (
     <Canvas
@@ -24,9 +62,22 @@ export function EnchantedUniverse({ scrollY }: EnchantedUniverseProps) {
       gl={{
         antialias: true,
         alpha: true,
-        powerPreference: "high-performance",
+        powerPreference: 'high-performance',
         depth: false,
         stencil: false,
+        // Add failIfMajorPerformanceCaveat to prevent WebGL context creation if performance would be poor
+        failIfMajorPerformanceCaveat: true,
+        // Add preserveDrawingBuffer to fix context issues
+        preserveDrawingBuffer: true,
+      }}
+      // Add dpr to control pixel ratio and improve performance
+      dpr={[1, 2]}
+      // Add frameloop to control animation loop
+      frameloop="demand"
+      onError={e => {
+        const error = e instanceof Error ? e : new Error('Canvas error occurred')
+        universeLogger.error('Canvas error:', error)
+        setInitError(error)
       }}
     >
       <AdaptiveDpr pixelated />
@@ -36,12 +87,15 @@ export function EnchantedUniverse({ scrollY }: EnchantedUniverseProps) {
   )
 }
 
+/**
+ * CosmicEffect component that creates the visual elements of the universe
+ */
 function CosmicEffect({ scrollY }: { scrollY: number }) {
   const universeRef = useRef<THREE.Group>(null)
   const starsRef = useRef<THREE.Points>(null)
   const constellationRef = useRef<THREE.Line>(null)
   const glyphsRef = useRef<THREE.Group>(null)
-  const { size, viewport } = useThree()
+  const { viewport } = useThree() // size is unused but may be needed in future updates
 
   // Animation state for smooth transitions
   const animationState = useRef({
@@ -162,20 +216,20 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
     // Star particles shader
     const starsMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        time: { value: 0 }
+        time: { value: 0 },
       },
       vertexShader: `
         uniform float time;
         attribute float size;
         attribute vec3 color;
         varying vec3 vColor;
-        
+
         void main() {
           vColor = color;
-          
+
           // Subtle pulsation based on position and time
           float pulseFactor = 0.8 + 0.2 * sin(time * 0.3 + position.x * 2.0 + position.y * 2.0 + position.z * 2.0);
-          
+
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           gl_PointSize = size * pulseFactor * size * (300.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
@@ -183,18 +237,18 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       `,
       fragmentShader: `
         varying vec3 vColor;
-        
+
         void main() {
           // Create a soft circular point
           float r = distance(gl_PointCoord, vec2(0.5, 0.5));
           if (r > 0.5) discard;
-          
+
           // Soften the edges
           float alpha = 1.0 - smoothstep(0.3, 0.5, r);
-          
+
           // Add a subtle glow
           vec3 glow = vColor * (1.0 - r * 1.5);
-          
+
           gl_FragColor = vec4(glow, alpha);
         }
       `,
@@ -211,7 +265,7 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       vertexShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -220,24 +274,24 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       fragmentShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         void main() {
           // Create a flowing effect along the line
           float flow = fract(vUv.x - time * 0.1);
-          
+
           // Make the line fade in and out
           float opacity = 0.3 + 0.2 * sin(time * 0.2);
-          
+
           // Brighter at the nodes
           float nodeBrightness = smoothstep(0.45, 0.5, flow) - smoothstep(0.5, 0.55, flow);
           nodeBrightness = max(0.0, nodeBrightness * 3.0);
-          
+
           // Subtle color variation
           vec3 baseColor = vec3(0.9, 0.9, 1.0); // Slightly blue-white
           vec3 accentColor = vec3(0.8, 0.7, 1.0); // Subtle purple
-          
+
           vec3 finalColor = mix(baseColor, accentColor, sin(time * 0.3) * 0.5 + 0.5);
-          
+
           gl_FragColor = vec4(finalColor, (opacity + nodeBrightness) * smoothstep(0.0, 0.1, 1.0 - abs(vUv.y - 0.5) * 2.0));
         }
       `,
@@ -254,7 +308,7 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       vertexShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -263,25 +317,25 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       fragmentShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         void main() {
           // Create a subtle pulsing glow
           float pulse = 0.7 + 0.3 * sin(time * 0.4);
-          
+
           // Iridescent effect
           vec3 baseColor = vec3(0.9, 0.9, 1.0); // White base
           vec3 color1 = vec3(0.7, 0.9, 1.0); // Light blue
           vec3 color2 = vec3(0.9, 0.7, 1.0); // Light purple
-          
+
           float t = sin(time * 0.2) * 0.5 + 0.5;
           vec3 iridescence = mix(color1, color2, t);
-          
+
           // Edge glow
           float edge = 1.0 - abs(vUv.y - 0.5) * 2.0;
           edge = pow(edge, 0.5);
-          
+
           vec3 finalColor = mix(baseColor, iridescence, edge) * pulse;
-          
+
           gl_FragColor = vec4(finalColor, edge * 0.7);
         }
       `,
@@ -297,7 +351,7 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       },
       vertexShader: `
         varying vec2 vUv;
-        
+
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -306,12 +360,12 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
       fragmentShader: `
         uniform float time;
         varying vec2 vUv;
-        
+
         // Simplex noise function
         vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
         vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
         vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
-        
+
         float snoise(vec2 v) {
           const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
           vec2 i  = floor(v + dot(v, C.yy));
@@ -334,33 +388,33 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
           g.yz = a0.yz * x12.xz + h.yz * x12.yw;
           return 130.0 * dot(m, g);
         }
-        
+
         void main() {
           // Create a subtle nebula effect
           vec2 uv = vUv * 2.0 - 1.0;
-          
+
           // Multiple layers of noise
           float n1 = snoise(uv * 1.5 + time * 0.02);
           float n2 = snoise(uv * 3.0 - time * 0.01);
           float n3 = snoise(uv * 5.0 + time * 0.03);
-          
+
           // Combine noise layers
           float noise = 0.5 * n1 + 0.3 * n2 + 0.2 * n3;
-          
+
           // Create color gradients
           vec3 darkBlue = vec3(0.05, 0.05, 0.1); // Deep space
           vec3 purple = vec3(0.2, 0.05, 0.3); // Cosmic purple
           vec3 teal = vec3(0.05, 0.2, 0.2); // Cosmic teal
-          
+
           // Mix colors based on noise and position
           vec3 color = mix(darkBlue, purple, noise * 0.5 + 0.5);
           color = mix(color, teal, length(uv) * 0.2);
-          
+
           // Add distance falloff for a vignette effect
           float falloff = 1.0 - length(uv) * 0.7;
           falloff = max(0.0, falloff);
           falloff = pow(falloff, 2.0);
-          
+
           // Final color with opacity
           gl_FragColor = vec4(color * falloff, falloff * 0.3);
         }
@@ -379,7 +433,7 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
   }, [])
 
   // Animation loop with frame timing and smooth interpolation
-  useFrame((state) => {
+  useFrame(state => {
     const time = state.clock.getElapsedTime()
     const deltaTime = state.clock.getDelta()
 
@@ -395,8 +449,10 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
     animationState.current.lastScrollY = scrollY
 
     // Target values based on scroll with velocity influence
-    const targetRotationSpeed = 0.03 - Math.min(0.02, scrollY / 10000) + Math.abs(scrollVelocity) * 0.00003
-    const targetGlyphRotationSpeed = 0.02 - Math.min(0.01, scrollY / 12000) + Math.abs(scrollVelocity) * 0.00002
+    const targetRotationSpeed =
+      0.03 - Math.min(0.02, scrollY / 10000) + Math.abs(scrollVelocity) * 0.00003
+    const targetGlyphRotationSpeed =
+      0.02 - Math.min(0.01, scrollY / 12000) + Math.abs(scrollVelocity) * 0.00002
     const targetGlowIntensity = 1.2 - Math.min(0.3, scrollY / 3000)
 
     // Adaptive smoothing based on frame rate
@@ -408,7 +464,8 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
 
     // Smoother scroll response for x rotation
     const targetXRotation = scrollY * 0.00003 // Very subtle
-    animationState.current.rotation.x += (targetXRotation - animationState.current.rotation.x) * adaptiveLerpFactor
+    animationState.current.rotation.x +=
+      (targetXRotation - animationState.current.rotation.x) * adaptiveLerpFactor
 
     // Update glyph rotation
     animationState.current.glyphRotation += targetGlyphRotationSpeed * deltaTime * 60 * 0.01
@@ -438,8 +495,16 @@ function CosmicEffect({ scrollY }: { scrollY: number }) {
   useEffect(() => {
     return () => {
       // Dispose of geometries and materials to prevent memory leaks
-      Object.values(glyphGeometries).forEach((geometry) => geometry.dispose())
-      Object.values(materials).forEach((material) => material.dispose())
+      tryCatchSync(
+        () => {
+          universeLogger.debug('Disposing EnchantedUniverse resources')
+          Object.values(glyphGeometries).forEach(geometry => geometry.dispose())
+          Object.values(materials).forEach(material => material.dispose())
+        },
+        error => {
+          universeLogger.error('Error disposing resources:', error)
+        }
+      )
     }
   }, [glyphGeometries, materials])
 

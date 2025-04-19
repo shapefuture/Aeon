@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from 'react'
 
 export function GlowingPortal() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -9,7 +9,7 @@ export function GlowingPortal() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext("2d")
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
 
     // Set canvas dimensions
@@ -24,7 +24,7 @@ export function GlowingPortal() {
     }
 
     setCanvasDimensions()
-    window.addEventListener("resize", setCanvasDimensions)
+    window.addEventListener('resize', setCanvasDimensions)
 
     // Animation variables
     let animationFrameId: number
@@ -45,12 +45,19 @@ export function GlowingPortal() {
       const outerRadius = 200 + Math.sin(time * 0.3) * 20
 
       // Draw the outer glow
-      const outerGradient = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius)
+      const outerGradient = ctx.createRadialGradient(
+        centerX,
+        centerY,
+        innerRadius,
+        centerX,
+        centerY,
+        outerRadius
+      )
 
-      outerGradient.addColorStop(0, "rgba(255, 255, 255, 0.8)")
-      outerGradient.addColorStop(0.2, "rgba(180, 120, 255, 0.6)")
-      outerGradient.addColorStop(0.6, "rgba(120, 80, 200, 0.3)")
-      outerGradient.addColorStop(1, "rgba(80, 40, 170, 0)")
+      outerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)')
+      outerGradient.addColorStop(0.2, 'rgba(180, 120, 255, 0.6)')
+      outerGradient.addColorStop(0.6, 'rgba(120, 80, 200, 0.3)')
+      outerGradient.addColorStop(1, 'rgba(80, 40, 170, 0)')
 
       ctx.fillStyle = outerGradient
       ctx.beginPath()
@@ -61,15 +68,15 @@ export function GlowingPortal() {
       ctx.beginPath()
       ctx.arc(centerX, centerY, 80, 0, Math.PI, true)
       ctx.lineWidth = 4
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.9)"
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
       ctx.stroke()
 
       // Draw the inner glow
       const innerGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 80)
 
-      innerGradient.addColorStop(0, "rgba(255, 255, 255, 1)")
-      innerGradient.addColorStop(0.5, "rgba(220, 180, 255, 0.8)")
-      innerGradient.addColorStop(1, "rgba(180, 120, 255, 0)")
+      innerGradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+      innerGradient.addColorStop(0.5, 'rgba(220, 180, 255, 0.8)')
+      innerGradient.addColorStop(1, 'rgba(180, 120, 255, 0)')
 
       ctx.fillStyle = innerGradient
       ctx.beginPath()
@@ -101,7 +108,7 @@ export function GlowingPortal() {
     draw()
 
     return () => {
-      window.removeEventListener("resize", setCanvasDimensions)
+      window.removeEventListener('resize', setCanvasDimensions)
       cancelAnimationFrame(animationFrameId)
     }
   }, [])
@@ -111,7 +118,7 @@ export function GlowingPortal() {
       ref={canvasRef}
       className="w-full h-[300px]"
       style={{
-        background: "transparent",
+        background: 'transparent',
       }}
     />
   )

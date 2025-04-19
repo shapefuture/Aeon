@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Brain, Link2, Sparkles, Zap } from "lucide-react"
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Brain, Link2, Sparkles, Zap } from 'lucide-react'
 
 export function FeatureSection() {
   const [activeFeature, setActiveFeature] = useState(0)
@@ -10,25 +10,27 @@ export function FeatureSection() {
   const features = [
     {
       icon: <Brain className="w-6 h-6" />,
-      title: "Think naturally",
-      description: "Reflect mirrors the way your brain works, helping you make connections between ideas effortlessly.",
+      title: 'Think naturally',
+      description:
+        'Reflect mirrors the way your brain works, helping you make connections between ideas effortlessly.',
     },
     {
       icon: <Link2 className="w-6 h-6" />,
-      title: "Connect everything",
-      description: "Create bi-directional links between notes, building a network of knowledge that grows with you.",
+      title: 'Connect everything',
+      description:
+        'Create bi-directional links between notes, building a network of knowledge that grows with you.',
     },
     {
       icon: <Sparkles className="w-6 h-6" />,
-      title: "AI-powered insights",
+      title: 'AI-powered insights',
       description:
-        "Our AI helps you discover connections you might have missed and surfaces relevant information when you need it.",
+        'Our AI helps you discover connections you might have missed and surfaces relevant information when you need it.',
     },
     {
       icon: <Zap className="w-6 h-6" />,
-      title: "Lightning fast",
+      title: 'Lightning fast',
       description:
-        "Designed for speed with keyboard shortcuts and instant search, so you can capture ideas as quickly as they come.",
+        'Designed for speed with keyboard shortcuts and instant search, so you can capture ideas as quickly as they come.',
     },
   ]
 
@@ -36,7 +38,9 @@ export function FeatureSection() {
     <section className="py-20 bg-gradient-to-b from-[#130821] to-[#0a0413]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Features that enhance your thinking</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Features that enhance your thinking
+          </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Reflect is designed to work the way your brain does, not the other way around.
           </p>
@@ -48,7 +52,9 @@ export function FeatureSection() {
               <div
                 key={index}
                 className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
-                  activeFeature === index ? "bg-purple-900/30 border border-purple-500/30" : "hover:bg-gray-800/50"
+                  activeFeature === index
+                    ? 'bg-purple-900/30 border border-purple-500/30'
+                    : 'hover:bg-gray-800/50'
                 }`}
                 onClick={() => setActiveFeature(index)}
               >
@@ -72,7 +78,9 @@ export function FeatureSection() {
               transition={{ duration: 0.3 }}
               className="text-center p-8"
             >
-              <div className="bg-purple-600 rounded-full p-4 inline-block mb-6">{features[activeFeature].icon}</div>
+              <div className="bg-purple-600 rounded-full p-4 inline-block mb-6">
+                {features[activeFeature].icon}
+              </div>
               <h3 className="text-2xl font-bold mb-4">{features[activeFeature].title}</h3>
               <p className="text-gray-300">{features[activeFeature].description}</p>
             </motion.div>
