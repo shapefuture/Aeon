@@ -4,96 +4,334 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aeon Website</title>
-  
-  <!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Aeon">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="generator" content="v0.dev">
-  
-  <!-- Favicon and App Icons -->
-  <link rel="icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-  <link rel="manifest" href="manifest.json">
-  
-  <!-- Styles -->
-  <link rel="stylesheet" href="_next/static/css/4a1b648a5a4f56b6.css">
-  
   <style>
     body {
-      background-color: #000;
-      color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       margin: 0;
       padding: 0;
-    }
-    
-    .loading {
+      background-color: #0C0C0C;
+      color: #F4F2F1;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    header {
+      background-color: rgba(12, 12, 12, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 1.5rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      height: 100vh;
-      width: 100vw;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     
-    .loading-spinner {
-      border: 4px solid rgba(255, 255, 255, 0.1);
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .logo-circle {
+      width: 2rem;
+      height: 2rem;
+      border: 1px solid #9C9C9C;
       border-radius: 50%;
-      border-top: 4px solid #fff;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .logo-text {
+      color: #9C9C9C;
+      font-size: 0.75rem;
+    }
+    
+    .brand-name {
+      font-family: serif;
+      letter-spacing: 0.1em;
+    }
+    
+    nav {
+      display: none;
+    }
+    
+    @media (min-width: 768px) {
+      nav {
+        display: flex;
+        gap: 2rem;
+      }
+    }
+    
+    nav a {
+      color: #9C9C9C;
+      text-decoration: none;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      letter-spacing: 0.1em;
+      transition: color 0.3s;
+    }
+    
+    nav a:hover {
+      color: #F4F2F1;
+    }
+    
+    .button {
+      background-color: transparent;
+      border: 1px solid #9C9C9C;
+      color: #F4F2F1;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .button:hover {
+      background-color: rgba(244, 242, 241, 0.05);
+    }
+    
+    .hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 1rem;
+    }
+    
+    .hero-content {
+      max-width: 48rem;
+    }
+    
+    .subtitle {
+      color: #9C9C9C;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      font-size: 0.75rem;
+      margin-bottom: 3rem;
+      opacity: 0.8;
+    }
+    
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 2rem;
+    }
+    
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 3rem;
+      }
+    }
+    
+    .description {
+      color: #9C9C9C;
+      font-size: 1.125rem;
+      max-width: 36rem;
+      margin: 0 auto 3rem;
+    }
+    
+    .button-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .icon {
+      transition: transform 0.3s;
+    }
+    
+    .button-with-icon:hover .icon {
+      transform: translateX(0.25rem);
+    }
+    
+    .star-icon {
+      position: absolute;
+      bottom: 3rem;
+      right: 3rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      opacity: 0.2;
+      cursor: pointer;
+      transition: opacity 0.5s;
+    }
+    
+    .star-icon:hover {
+      opacity: 0.6;
+    }
+    
+    section {
+      padding: 6rem 1rem;
+    }
+    
+    .container {
+      max-width: 48rem;
+      margin: 0 auto;
+    }
+    
+    h2 {
+      font-size: 1.875rem;
+      font-weight: 300;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .text-content {
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+    
+    .text-content p {
+      color: #9C9C9C;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .feature-marker {
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid #9C9C9C;
+      margin-right: 0.75rem;
+      margin-top: 0.25rem;
+      flex-shrink: 0;
+    }
+    
+    footer {
+      padding: 3rem 1rem;
+      border-top: 1px solid #1A1A1A;
+    }
+    
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 768px) {
+      .footer-content {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+    
+    .copyright {
+      color: #9C9C9C;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
   </style>
 </head>
-<body class="min-h-screen bg-black font-sans antialiased">
-  <div id="__next">
-    <div class="loading">
-      <div class="loading-spinner"></div>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-circle">
+          <span class="logo-text">Æ</span>
+        </div>
+        <span class="brand-name">AEON</span>
+      </div>
+      <nav>
+        <a href="#what-we-do">Process</a>
+        <a href="#for-whom">Patrons</a>
+        <a href="#artists">Artists</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button class="button">Begin</button>
     </div>
-  </div>
+  </header>
   
-  <!-- Scripts -->
-  <script src="_next/static/chunks/webpack-69a5d7732a2b51aa.js"></script>
-  <script src="_next/static/chunks/main-app-7eacf51e1230d173.js"></script>
-  <script src="_next/static/chunks/47edcb22-88cdbe56a27cf0a4.js"></script>
-  <script src="_next/static/chunks/323-c1c0f4b58a2c5802.js"></script>
-  <script src="_next/static/chunks/app/page-6b64a1da507e2ad9.js"></script>
-  <script src="_next/static/chunks/app/layout-90ce019cf2a01a28.js"></script>
-  <script src="_next/static/chunks/479f18de-3ab7ae0ca731c6e5.js"></script>
-  <script src="_next/static/chunks/01826c6a-c4d3a5a8baa13357.js"></script>
-  <script src="_next/static/chunks/91c6c604-76a0e8eb825e7da0.js"></script>
-  <script src="_next/static/chunks/468-1fe2f796bee91efa.js"></script>
-  <script src="_next/static/chunks/836-2c515332768a1719.js"></script>
-  <script src="_next/static/chunks/app/not-found-4bf6157492b2d622.js"></script>
-  <script src="_next/static/chunks/polyfills-42372ed130431b0a.js"></script>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="subtitle">Private Atelier</div>
+      <h1>Some truths can't be spoken.<br>They must be sculpted.</h1>
+      <p class="description">Bespoke experiences and symbolic artifacts, co-created with boundary-pushing contemporary artists. Designed to reflect who you are—or who you are becoming.</p>
+      <button class="button button-with-icon">
+        <span>Begin The Discovery</span>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </button>
+      <div class="star-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L15 9L22 10L17 15L18 22L12 19L6 22L7 15L2 10L9 9L12 2Z" stroke="#F4F2F1" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </div>
+    </div>
+  </section>
   
-  <!-- Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').then(function(registration) {
-          console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        }, function(err) {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-      });
-    }
-  </script>
+  <section id="what-we-do">
+    <div class="container">
+      <h2>We Create the Uncreated.</h2>
+      <div class="text-content">
+        <p>At AEON, we don't sell art.<br>We produce personal mythologies—through form, material, and meaning.<br>You bring the question.<br>We translate it into a living, breathing artifact.</p>
+        <p>This may take the shape of:</p>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="feature-marker"></span>
+            <span>An ephemeral installation that lives only one night.</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-marker"></span>
+            <span>A living portrait based on your neural rhythms.</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-marker"></span>
+            <span>A sculpture that evolves with time—and your biology.</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-marker"></span>
+            <span>A private immersive opera about your lineage.</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-marker"></span>
+            <span>A mirror that doesn't show your face, but your future.</span>
+          </li>
+        </ul>
+        <p>Each project is a collaboration between you, a dedicated curator, and a global network of transdisciplinary artists.</p>
+      </div>
+    </div>
+  </section>
   
-  <!-- Unsplash API Key -->
-  <script>
-    window.UNSPLASH_API_KEY = "Yl0_i4llreUJkEwppf9C87QACcFhBOBPFN2Glk3yWcs";
-  </script>
-  
-  <!-- GitHub Pages Redirect Script -->
-  <script src="gh-pages-redirect.js" defer></script>
+  <footer>
+    <div class="footer-content">
+      <div class="logo">
+        <div class="logo-circle">
+          <span class="logo-text">Æ</span>
+        </div>
+        <span class="brand-name">AEON</span>
+      </div>
+      <div class="copyright">By invitation only. 2025.</div>
+    </div>
+  </footer>
 </body>
 </html>
